@@ -1,40 +1,21 @@
-SRCS = s21_matrix.c
+SRCS = matrix.c
 	
 OBJS = ${SRCS:.c=.o}
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra -std=c11 -D_GNU_SOURCE -lm
 
-all: clean s21_matrix.a test
+all: matrix.a matrix
 
-s21_matrix.a: ${SRCS}
+matrix.a: ${SRCS}
 	${CC} ${CFLAGS} -c ${SRCS}
-	@ar rcs s21_matrix.a ${OBJS}
-	@ranlib s21_matrix.a
+	@ar rcs matrix.a ${OBJS}
+	@ranlib matrix.a
 
-test: s21_matrix.a unit_test
-
-unit_test:
-	${CC} ${CFLAGS} -c s21_matrix-test.c
-	${CC} s21_matrix-test.o s21_matrix.a -lcheck -o test
-	./test
-
-gcov_report: s21_matrix.a
-	@gcc --coverage s21_matrix-test.c -lcheck ${SRCS} -o unit-test
-	@./unit-test
-	@lcov -t "test" -o test.info -c -d .
-	@genhtml -o report test.info
+matrix: matrix.a
+	@${CC} matrix.a -o matrix
 	
 clean:
-	@/bin/rm -rf *.o *.a test unit-test *.gcno *gcda report *.info main
-
-checks: cppcheck leaks style
-
-style:
-	python3 ../materials/linters/cpplint.py --extensions=c *.c *.h
+	@rm -rf *.o *.a matrix
 
 cppcheck:
 	cppcheck --enable=all --suppress=missingIncludeSystem . *.c
-
-leaks: s21_matrix-test.c
-	CK_FORK=no leaks --atExit -- ./test
-	
